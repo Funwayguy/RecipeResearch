@@ -19,7 +19,7 @@ apply plugin: 'forge'
 
 version = "RR_VER_KEY"
 group= "reciperesearch" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "SolarCraft"
+archivesBaseName = "RecipeResearch"
 
 minecraft {
     version = "1.7.10-10.13.2.1230"
