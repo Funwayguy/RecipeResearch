@@ -1,0 +1,12 @@
+item.reciperesearch.textbook_0.name=Recipes for Dummies Vol. 1
+item.reciperesearch.textbook_1.name=Recipes for Dummies Vol. 2
+item.reciperesearch.textbook_2.name=Recipes for Dummies Vol. 3
+item.reciperesearch.textbook_3.name=Creative Recipe Encyclopaedia
+item.reciperesearch.research_page.name=Research Page
+item.reciperesearch.failed_item.name=Failed Item
+
+tile.reciperesearch.prototype_table.name=Prototyping Table
+
+reciperesearch.chat.incomplete=Research incomplete
+reciperesearch.chat.perfected=Perfected %s recipe!
+reciperesearch.chat.efficiency=Base crafting increased to %s

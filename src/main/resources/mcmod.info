@@ -1,0 +1,16 @@
+[
+{
+  "modid": "reciperesearch",
+  "name": "RecipeResearch",
+  "description": "Nobody is spontaneously perfect at crafting so why should you be in Minecraft. Practice makes perfect",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Funwayguy","Darkosto"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
