@@ -17,8 +17,8 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "SC_VER_KEY"
-group= "solarcraft" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+version = "RR_VER_KEY"
+group= "reciperesearch" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "SolarCraft"
 
 minecraft {

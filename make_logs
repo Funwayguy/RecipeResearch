@@ -3,15 +3,15 @@
 ##############################################################################
 ##
 ##  Changelog creation script for use with Git Shell & Drone.io
-##  Created by Funwayguy for SolarCraft
+##  Created by Funwayguy for RecipeResearch
 ##
 ##############################################################################
 
 # Offline Debug Variables
 #DRONE_BUILD_NUMBER=0
-#ver_num="SC_VER_KEY"
+#ver_num="RR_VER_KEY"
 
 # Create document for update notice
 echo $ver_num > version.txt
-echo "https://drone.io/github.com/Funwayguy/SolarCraft/files" >> version.txt
+echo "https://drone.io/github.com/Funwayguy/RecipeResearch/files" >> version.txt
 git log -1 --pretty=format:"%B" >> version.txt
