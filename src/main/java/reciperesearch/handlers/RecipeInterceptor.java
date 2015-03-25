@@ -75,7 +75,7 @@ public class RecipeInterceptor implements IRecipe
 			}
 		}
 		
-		if(!world.isRemote && output.stack != null && crafters != null && crafters.size() > 0 && !Arrays.asList(RR_Settings.recipeWhitelist).contains(researchID))
+		if(world != null && !world.isRemote && output.stack != null && crafters != null && crafters.size() > 0 && !Arrays.asList(RR_Settings.recipeWhitelist).contains(researchID))
 		{
 			int num = 100;
 			
