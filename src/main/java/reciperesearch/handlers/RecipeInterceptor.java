@@ -4,6 +4,8 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Random;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ICrafting;
@@ -14,8 +16,10 @@ import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.item.crafting.ShapelessRecipes;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 import org.apache.logging.log4j.Level;
@@ -25,6 +29,7 @@ import reciperesearch.utils.ResearchHelper;
 
 public class RecipeInterceptor implements IRecipe
 {
+	Random rand = new Random();
 	boolean isCustom = false;
 	ArrayList crafters;
 	Container container;
@@ -35,10 +40,28 @@ public class RecipeInterceptor implements IRecipe
 	@Override
 	public boolean matches(InventoryCrafting invo, World world)
 	{
-		container = getContainer(invo);
-		crafters = container == null? null : getCrafters(container);
+		checkAndResetIntercept();
 		
-		if(CraftingManager.getInstance().getRecipeList().get(0) != this) // Just making sure something didn't mess with the intercept position
+		output = findMatchingRecipe(invo, world);
+		
+		if(output.recipe == null) // Looks like the recipe we intercepted is a repair recipe and probably shouldn't have been intercepted in the first place
+		{
+			return false;
+		} else if(getIngredients(output.stack).size() <= 0) // We can't find any research ingredients for this recipe, including the resulting item, so we're just going to let the recipe handle itself
+		{
+			isCustom = true;
+			return true;
+		}
+		
+		return true; // This will always result in true because we want this to be the first and only recipe Minecraft checks
+	}
+	
+	/**
+	 * Ensure the recipe intercept is still in place
+	 */
+	public void checkAndResetIntercept()
+	{
+		if(CraftingManager.getInstance().getRecipeList().get(0) != this)
 		{
 			CraftingManager.getInstance().getRecipeList().remove(this);
 			CraftingManager.getInstance().getRecipeList().add(0, this);
@@ -51,17 +74,12 @@ public class RecipeInterceptor implements IRecipe
 		{
 			UnHideAll();
 		}
-		
-		output = findMatchingRecipe(invo, world);
-		
-		if(output.recipe == null) // Looks like the recipe we intercepted is a repair recipe and probably shouldn't have been intercepted in the first place
-		{
-			return false;
-		} else if(getIngredients(output.stack).size() <= 0)
-		{
-			isCustom = true;
-			return true;
-		}
+	}
+	
+	public void setSuccessResult(InventoryCrafting invo)
+	{
+		container = getContainer(invo);
+		crafters = container == null? null : getCrafters(container);
 		
 		String researchID = "";
 		
@@ -73,49 +91,65 @@ public class RecipeInterceptor implements IRecipe
 			{
 				researchID = researchID + ":" + output.stack.getItemDamage();
 			}
+		} else
+		{
+			return; // There is no item to replace...
 		}
 		
-		if(world != null && !world.isRemote && output.stack != null && crafters != null && crafters.size() > 0 && !Arrays.asList(RR_Settings.recipeWhitelist).contains(researchID))
+		if(crafters == null || crafters.size() <= 0 || Arrays.asList(RR_Settings.recipeWhitelist).contains(researchID)) // Either no-one is crafting this recipe or the item is whitelisted
 		{
-			int num = 100;
+			return;
+		}
+		
+		int num = 100;
+		
+		Iterator<ICrafting> iterator = crafters.iterator();
+		
+		while(iterator.hasNext())
+		{
+			ICrafting crafter = iterator.next();
 			
-			Iterator<ICrafting> iterator = crafters.iterator();
-			
-			while(iterator.hasNext())
+			if(crafter instanceof Entity) // If we can obtain any form of entity pull the world object
 			{
-				ICrafting crafter = iterator.next();
-				if(crafter instanceof EntityPlayerMP)
+				if(((Entity)crafter).worldObj.isRemote)
 				{
-					EntityPlayerMP player = (EntityPlayerMP)crafter;
-					int baseEff = ResearchHelper.getResearchEfficiency(player);
-					num = MathHelper.clamp_int(ResearchHelper.getItemResearch(player, output.stack), baseEff, 100);
+					return; // The world is remote so we don't change the result (we don't want the client to know)
 				}
 			}
 			
-			if(num < world.rand.nextInt(100))
+			if(crafter instanceof EntityPlayerMP)
 			{
-				ItemStack failStack = new ItemStack(RecipeResearch.failedItem);
-				failStack.setStackDisplayName(output.stack.getDisplayName());
-				output.stack = failStack;
+				EntityPlayerMP player = (EntityPlayerMP)crafter;
+				int baseEff = ResearchHelper.getResearchEfficiency(player);
+				num = MathHelper.clamp_int(ResearchHelper.getItemResearch(player, output.stack), baseEff, 100);
 			}
 		}
 		
-		return true; // This will always result in true because we want this to be the first and only recipe Minecraft checks
+		if(num < rand.nextInt(100))
+		{
+			ItemStack failStack = new ItemStack(RecipeResearch.failedItem);
+			failStack.setStackDisplayName(output.stack.getDisplayName());
+			output.stack = failStack;
+		}
 	}
 	
 	@Override
 	public ItemStack getCraftingResult(InventoryCrafting invo)
 	{
-		if(container != null)
-		{
-			container.detectAndSendChanges();
-		}
+		checkAndResetIntercept();
 		
 		if(isCustom)
 		{
 			return output.recipe.getCraftingResult(invo);
 		} else
 		{
+			setSuccessResult(invo); // Insert evil here >:D
+			
+			if(container != null)
+			{
+				container.detectAndSendChanges();
+			}
+			
 			return output.stack;
 		}
 	}
@@ -276,7 +310,7 @@ public class RecipeInterceptor implements IRecipe
     			
     			for(ItemStack iStack : sr.recipeItems)
     			{
-    				if(!ContainsStack(ing, (ItemStack)iStack))
+    				if(iStack != null && !ContainsStack(ing, (ItemStack)iStack, false))
     				{
     					ing.add(iStack);
     				}
@@ -287,7 +321,7 @@ public class RecipeInterceptor implements IRecipe
     			
     			for(Object iStack : sr.recipeItems)
     			{
-    				if(!ContainsStack(ing, (ItemStack)iStack))
+    				if(iStack != null && !ContainsStack(ing, (ItemStack)iStack, false))
     				{
     					ing.add((ItemStack)iStack);
     				}
@@ -298,21 +332,32 @@ public class RecipeInterceptor implements IRecipe
     			
     			for(Object obj : sor.getInput())
     			{
-    				if(obj instanceof ItemStack)
+    				if(obj == null)
     				{
-    					if(!ContainsStack(ing, (ItemStack)obj))
+    					continue;
+    				} else if(obj instanceof ItemStack)
+    				{
+    					if(!ContainsStack(ing, (ItemStack)obj, false))
     					{
     						ing.add((ItemStack)obj);
     					}
     				} else if(obj instanceof ArrayList)
     				{
-    					for(Object obj1 : (ArrayList)obj)
+    					if(((ArrayList)obj).size() <= 0)
     					{
-    						if(!ContainsStack(ing, (ItemStack)obj1))
-    						{
-    							ing.add((ItemStack)obj1);
-    						}
+    						continue;
     					}
+    					
+    					ItemStack tmpStack = ItemStack.copyItemStack((ItemStack)((ArrayList)obj).get(0)); // We copy the stack because we need to edit it slightly
+    				
+						if(!ContainsStack(ing, tmpStack, true))
+						{
+							NBTTagCompound tmpTag = tmpStack.getTagCompound();
+							tmpTag = tmpTag != null? tmpTag : new NBTTagCompound();
+							tmpTag.setBoolean("UseOreDict", true);
+							tmpStack.setTagCompound(tmpTag);
+							ing.add(tmpStack);
+						}
     				}
     			}
     		} else if(recipe instanceof ShapelessOreRecipe)
@@ -321,21 +366,32 @@ public class RecipeInterceptor implements IRecipe
     			
     			for(Object obj : sor.getInput())
     			{
-    				if(obj instanceof ItemStack)
+    				if(obj == null)
     				{
-    					if(!ContainsStack(ing, (ItemStack)obj))
+    					continue;
+    				} else if(obj instanceof ItemStack)
+    				{
+    					if(!ContainsStack(ing, (ItemStack)obj, false))
     					{
     						ing.add((ItemStack)obj);
     					}
     				} else if(obj instanceof ArrayList)
     				{
-    					for(Object obj1 : (ArrayList)obj)
+    					if(((ArrayList)obj).size() <= 0)
     					{
-    						if(!ContainsStack(ing, (ItemStack)obj1))
-    						{
-    							ing.add((ItemStack)obj1);
-    						}
+    						continue;
     					}
+    					
+    					ItemStack tmpStack = ItemStack.copyItemStack((ItemStack)((ArrayList)obj).get(0)); // We copy the stack because we need to edit it slightly
+    				
+						if(!ContainsStack(ing, tmpStack, true))
+						{
+							NBTTagCompound tmpTag = tmpStack.getTagCompound();
+							tmpTag = tmpTag != null? tmpTag : new NBTTagCompound();
+							tmpTag.setBoolean("UseOreDict", true);
+							tmpStack.setTagCompound(tmpTag);
+							ing.add(tmpStack);
+						}
     				}
     			}
     		} else // Extend on more supported recipe types here... probably a good place for additional NEI support
@@ -380,7 +436,7 @@ public class RecipeInterceptor implements IRecipe
     	}
     }
     
-    public static boolean ContainsStack(ArrayList<ItemStack> list, ItemStack stack)
+    public static boolean ContainsStack(ArrayList<ItemStack> list, ItemStack stack, boolean oreDict)
     {
     	if(stack == null)
     	{
@@ -394,12 +450,60 @@ public class RecipeInterceptor implements IRecipe
     			continue;
     		}
     		
-    		if(entry.getItem() == stack.getItem() && (entry.getItemDamage() == stack.getItemDamage() || entry.getItem().isDamageable()))
+    		if(oreDict? AllMatch(entry, stack) : StackMatch(entry, stack))
     		{
     			return true;
     		}
     	}
     	
     	return false;
+    }
+    
+    public static boolean StackMatch(ItemStack stack1, ItemStack stack2)
+    {
+    	return stack1.getItem() == stack2.getItem() && (stack1.getItemDamage() == stack2.getItemDamage() || stack1.getItem().isDamageable() || stack1.getItemDamage() == OreDictionary.WILDCARD_VALUE);
+    }
+    
+    public static boolean OreDictionaryMatch(ItemStack stack, String name)
+    {
+    	for(ItemStack oreStack : OreDictionary.getOres(name))
+    	{
+    		if(StackMatch(stack, oreStack))
+    		{
+    			return true;
+    		}
+    	}
+    	
+    	return false;
+    }
+    
+    public static boolean AllMatch(ItemStack stack1, ItemStack stack2)
+    {
+    	if(StackMatch(stack1, stack2))
+    	{
+    		return true;
+    	}
+    	
+    	for(int id : OreDictionary.getOreIDs(stack1)) // Search all ore dictionary listings for matches
+    	{
+    		if(OreDictionaryMatch(stack2, OreDictionary.getOreName(id)))
+    		{
+    			return true;
+    		}
+    	}
+    	
+    	return false;
+    }
+    
+    public static ArrayList<ItemStack> getAllOreSiblings(ItemStack stack)
+    {
+    	ArrayList<ItemStack> list = new ArrayList<ItemStack>();
+    	
+    	for(int id : OreDictionary.getOreIDs(stack))
+    	{
+    		list.addAll(OreDictionary.getOres(OreDictionary.getOreName(id)));
+    	}
+    	
+    	return list;
     }
 }

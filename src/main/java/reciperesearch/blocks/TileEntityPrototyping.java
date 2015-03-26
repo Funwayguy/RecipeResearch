@@ -1,9 +1,6 @@
 package reciperesearch.blocks;
 
 import java.util.ArrayList;
-import reciperesearch.core.RecipeResearch;
-import reciperesearch.handlers.RecipeInterceptor;
-import reciperesearch.utils.ResearchHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -11,6 +8,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MathHelper;
+import reciperesearch.core.RecipeResearch;
+import reciperesearch.handlers.RecipeInterceptor;
+import reciperesearch.utils.ResearchHelper;
 
 public class TileEntityPrototyping extends TileEntity implements IInventory
 {
@@ -122,6 +122,7 @@ public class TileEntityPrototyping extends TileEntity implements IInventory
 	    				NBTTagCompound inputTag = new NBTTagCompound();
 	    				ingStack.writeToNBT(inputTag);
 	    				inputTag.setInteger("Research", 0);
+	    				inputTag.setBoolean("UseOreDict", inputTag.getCompoundTag("tag").getBoolean("UseOreDict"));
 	    				inTags.appendTag(inputTag);
 	    			}
 	    			
@@ -146,8 +147,9 @@ public class TileEntityPrototyping extends TileEntity implements IInventory
     				NBTTagCompound ingTag = inTags.getCompoundTagAt(i);
     				ItemStack ingStack = ItemStack.loadItemStackFromNBT(ingTag);
     				int research = ingTag.getInteger("Research");
+    				boolean oreDict = ingTag.getBoolean("UseOreDict");
     				
-    				if(ingStack != null && ingStack.getItem() == input.getItem() && (input.getItem().isDamageable() || input.getItemDamage() == ingStack.getItemDamage() || ingStack.getItemDamage() == Short.MAX_VALUE))
+    				if(ingStack != null && (oreDict? RecipeInterceptor.AllMatch(ingStack, input) : RecipeInterceptor.StackMatch(ingStack, input)))
     				{
     					research = MathHelper.clamp_int(research + this.efficiency, 0, 100);
     					inTags.getCompoundTagAt(i).setInteger("Research", research);

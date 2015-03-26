@@ -1,5 +1,6 @@
 package reciperesearch.client;
 
+import java.util.ArrayList;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.RenderHelper;
@@ -14,6 +15,7 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import reciperesearch.blocks.TileEntityPrototyping;
+import reciperesearch.handlers.RecipeInterceptor;
 import reciperesearch.inventory.ContainerPrototyping;
 
 public class GuiPrototyping extends GuiContainer
@@ -65,7 +67,7 @@ public class GuiPrototyping extends GuiContainer
             	int n = 0;
             	if(inputs.tagCount() > 9)
             	{
-            		n += (int)((player.worldObj.getTotalWorldTime()%24000)/50)%MathHelper.ceiling_float_int((float)(inputs.tagCount() - 9)/3F) * 3;
+            		n += (int)((player.worldObj.getTotalWorldTime()%24000)/50)%MathHelper.ceiling_float_int((float)(inputs.tagCount() - 6)/3F) * 3;
             	}
             	
             	if(i + n > inputs.tagCount())
@@ -82,21 +84,25 @@ public class GuiPrototyping extends GuiContainer
             	if(inStack != null)
             	{
             		int research = inTag.getInteger("Research");
-            		if(research <= 0)
+            		if(research <= 0 && !(RecipeInterceptor.StackMatch(inStack, outStack) && inputs.tagCount() == 1))
             		{
             	        this.fontRendererObj.drawString("?", k + 53 + rx, l + 20 + ry, 4210752);
             		} else
             		{
-            			if(inStack.getItemDamage() == Short.MAX_VALUE)
+            			ItemStack tmpStack = inStack.copy();
+            			
+            			if(inTag.getBoolean("UseOreDict"))
             			{
-            				ItemStack tmpStack = inStack.copy();
+            				ArrayList<ItemStack> oreList = RecipeInterceptor.getAllOreSiblings(inStack);
+            				int cycle = (int)((player.worldObj.getTotalWorldTime()%24000)/20)%oreList.size();
+            				tmpStack = ItemStack.copyItemStack(oreList.get(cycle));
+            			} else if(inStack.getItemDamage() == Short.MAX_VALUE)
+            			{
             				int cycle = (int)((player.worldObj.getTotalWorldTime()%24000)/20)%16;
             				tmpStack.setItemDamage(cycle);
-            				this.drawItemStack(tmpStack, k + 47 + rx, l + 15 + ry, (research < 25? EnumChatFormatting.RED : (research < 75? EnumChatFormatting.YELLOW : EnumChatFormatting.GREEN)) + (research < 100? research + "%" : ""));
-            			} else
-            			{
-            				this.drawItemStack(inStack, k + 47 + rx, l + 15 + ry, (research < 25? EnumChatFormatting.RED : (research < 75? EnumChatFormatting.YELLOW : EnumChatFormatting.GREEN)) + (research < 100? research + "%" : ""));
             			}
+            			
+        				this.drawItemStack(tmpStack, k + 47 + rx, l + 15 + ry, (research < 25? EnumChatFormatting.RED : (research < 75? EnumChatFormatting.YELLOW : EnumChatFormatting.GREEN)) + (research < 100? research + "%" : ""));
             		}
             	} else
             	{
