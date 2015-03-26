@@ -1,12 +1,57 @@
 package reciperesearch.utils;
 
+import java.util.Arrays;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.MathHelper;
+import reciperesearch.core.RR_Settings;
+import reciperesearch.core.RecipeResearch;
 
 public class ResearchHelper
 {
+	public static void changeResult(EntityPlayer player, ItemStack stack)
+	{
+		String researchID = "";
+		
+		if(stack != null && player != null)
+		{
+			researchID = Item.itemRegistry.getNameForObject(stack.getItem());
+			
+			if(stack.getItem().isDamageable())
+			{
+				researchID = researchID + ":" + stack.getItemDamage();
+			}
+		} else
+		{
+			return; // There is no item to replace...
+		}
+		
+		if(player.worldObj.isRemote || Arrays.asList(RR_Settings.recipeWhitelist).contains(researchID)) // Either no-one is crafting this recipe or the item is white listed
+		{
+			return;
+		}
+		
+		int baseEff = ResearchHelper.getResearchEfficiency(player);
+		int num = MathHelper.clamp_int(ResearchHelper.getItemResearch(player, stack), baseEff, 100);
+		
+		if(num < player.getRNG().nextInt(100))
+		{
+			ItemStack failStack = new ItemStack(RecipeResearch.failedItem);
+			failStack.setStackDisplayName(stack.getDisplayName());
+			NBTTagCompound failTags = new NBTTagCompound();
+			failStack.writeToNBT(failTags);
+			stack.readFromNBT(failTags);
+			
+			/*if(player instanceof EntityPlayerMP)
+			{
+				((EntityPlayerMP)player).updateHeldItem();
+			}*/
+		}
+	}
+	
 	public static int getItemResearch(EntityPlayer player, ItemStack stack)
 	{
 		if(player == null || stack == null)

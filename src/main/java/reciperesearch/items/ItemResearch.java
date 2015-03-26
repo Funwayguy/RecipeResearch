@@ -64,8 +64,6 @@ public class ItemResearch extends Item
 			}
 		}
 		
-		System.out.println("Prefected crafting '" + outStack.getDisplayName() + "'");
-		
 		player.addChatComponentMessage(new ChatComponentText(StatCollector.translateToLocalFormatted("reciperesearch.chat.perfected", outStack.getDisplayName())));
 		
 		ResearchHelper.setItemResearch(player, outStack, 100);

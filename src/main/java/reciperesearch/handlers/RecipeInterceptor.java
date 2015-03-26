@@ -2,13 +2,9 @@ package reciperesearch.handlers;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Random;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ICrafting;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -17,7 +13,6 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.item.crafting.ShapelessRecipes;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
@@ -29,14 +24,17 @@ import reciperesearch.utils.ResearchHelper;
 
 public class RecipeInterceptor implements IRecipe
 {
+	public static final RecipeInterceptor instance = new RecipeInterceptor();
+	
 	Random rand = new Random();
 	boolean isCustom = false;
-	ArrayList crafters;
-	Container container;
 	RecipeInfo output = new RecipeInfo(null, null);
 	static ArrayList<IRecipe> allRecipes = new ArrayList<IRecipe>();
 	
-	@SuppressWarnings("unchecked")
+	private RecipeInterceptor() // Yea it's private and inaccessible. What of it
+	{
+	}
+	
 	@Override
 	public boolean matches(InventoryCrafting invo, World world)
 	{
@@ -59,6 +57,7 @@ public class RecipeInterceptor implements IRecipe
 	/**
 	 * Ensure the recipe intercept is still in place
 	 */
+	@SuppressWarnings("unchecked")
 	public void checkAndResetIntercept()
 	{
 		if(CraftingManager.getInstance().getRecipeList().get(0) != this)
@@ -76,111 +75,61 @@ public class RecipeInterceptor implements IRecipe
 		}
 	}
 	
-	public void setSuccessResult(InventoryCrafting invo)
-	{
-		container = getContainer(invo);
-		crafters = container == null? null : getCrafters(container);
-		
-		String researchID = "";
-		
-		if(output.stack != null)
-		{
-			researchID = Item.itemRegistry.getNameForObject(output.stack.getItem());
-			
-			if(output.stack.getItem().isDamageable())
-			{
-				researchID = researchID + ":" + output.stack.getItemDamage();
-			}
-		} else
-		{
-			return; // There is no item to replace...
-		}
-		
-		if(crafters == null || crafters.size() <= 0 || Arrays.asList(RR_Settings.recipeWhitelist).contains(researchID)) // Either no-one is crafting this recipe or the item is whitelisted
-		{
-			return;
-		}
-		
-		int num = 100;
-		
-		Iterator<ICrafting> iterator = crafters.iterator();
-		
-		while(iterator.hasNext())
-		{
-			ICrafting crafter = iterator.next();
-			
-			if(crafter instanceof Entity) // If we can obtain any form of entity pull the world object
-			{
-				if(((Entity)crafter).worldObj.isRemote)
-				{
-					return; // The world is remote so we don't change the result (we don't want the client to know)
-				}
-			}
-			
-			if(crafter instanceof EntityPlayerMP)
-			{
-				EntityPlayerMP player = (EntityPlayerMP)crafter;
-				int baseEff = ResearchHelper.getResearchEfficiency(player);
-				num = MathHelper.clamp_int(ResearchHelper.getItemResearch(player, output.stack), baseEff, 100);
-			}
-		}
-		
-		if(num < rand.nextInt(100))
-		{
-			ItemStack failStack = new ItemStack(RecipeResearch.failedItem);
-			failStack.setStackDisplayName(output.stack.getDisplayName());
-			output.stack = failStack;
-		}
-	}
-	
 	@Override
 	public ItemStack getCraftingResult(InventoryCrafting invo)
 	{
 		checkAndResetIntercept();
 		
-		if(isCustom)
+		if(output.recipe == null)
 		{
-			return output.recipe.getCraftingResult(invo);
-		} else
-		{
-			setSuccessResult(invo); // Insert evil here >:D
-			
-			if(container != null)
-			{
-				container.detectAndSendChanges();
-			}
-			
-			return output.stack;
+			return null;
 		}
+		
+		ItemStack outStack = output.recipe.getCraftingResult(invo);
+		
+		if(outStack != null)
+		{
+			outStack = outStack.copy(); // Just in case
+			
+			Container tmpCon = getContainer(invo);
+			ArrayList<?> crafters = tmpCon == null? null : getCrafters(tmpCon);
+			
+			if(crafters != null)
+			{
+				for(Object obj : crafters)
+				{
+					if(obj instanceof EntityPlayer)
+					{
+						ResearchHelper.changeResult((EntityPlayer)obj, outStack);
+						break;
+					}
+				}
+			}
+		}
+		
+		return outStack;
 	}
 
 	@Override
 	public int getRecipeSize()
 	{
-		if(output.recipe != null)
-		{
-			return output.recipe.getRecipeSize();
-		} else
+		if(output.recipe == null)
 		{
 			return 4;
 		}
+		
+		return output.recipe.getRecipeSize();
 	}
 
 	@Override
 	public ItemStack getRecipeOutput()
 	{
-		if(container != null)
+		if(output.recipe == null)
 		{
-			container.detectAndSendChanges();
+			return null;
 		}
 		
-		if(isCustom)
-		{
-			return output.recipe.getRecipeOutput();
-		} else
-		{
-			return output.stack;
-		}
+		return output.recipe.getRecipeOutput();
 	}
 	
 	// -------- MANAGER STUFFS BELOW -------- //
@@ -211,6 +160,7 @@ public class RecipeInterceptor implements IRecipe
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static void UnHideAll()
 	{
 		for(int i = allRecipes.size() - 1; i >= 0; i--)
@@ -224,7 +174,8 @@ public class RecipeInterceptor implements IRecipe
 		}
 	}
 	
-    public static RecipeInfo findMatchingRecipe(InventoryCrafting invo, World world)
+    @SuppressWarnings("unchecked")
+	public static RecipeInfo findMatchingRecipe(InventoryCrafting invo, World world)
     {
         int i = 0;
         ItemStack itemstack = null;
@@ -283,7 +234,8 @@ public class RecipeInterceptor implements IRecipe
         }
     }
     
-    public static ArrayList<ItemStack> getIngredients(ItemStack stack)
+    @SuppressWarnings("unchecked")
+	public static ArrayList<ItemStack> getIngredients(ItemStack stack)
     {
     	ArrayList<ItemStack> ing = new ArrayList<ItemStack>();
     	
@@ -343,12 +295,12 @@ public class RecipeInterceptor implements IRecipe
     					}
     				} else if(obj instanceof ArrayList)
     				{
-    					if(((ArrayList)obj).size() <= 0)
+    					if(((ArrayList<?>)obj).size() <= 0)
     					{
     						continue;
     					}
     					
-    					ItemStack tmpStack = ItemStack.copyItemStack((ItemStack)((ArrayList)obj).get(0)); // We copy the stack because we need to edit it slightly
+    					ItemStack tmpStack = ItemStack.copyItemStack((ItemStack)((ArrayList<?>)obj).get(0)); // We copy the stack because we need to edit it slightly
     				
 						if(!ContainsStack(ing, tmpStack, true))
 						{
@@ -377,12 +329,12 @@ public class RecipeInterceptor implements IRecipe
     					}
     				} else if(obj instanceof ArrayList)
     				{
-    					if(((ArrayList)obj).size() <= 0)
+    					if(((ArrayList<?>)obj).size() <= 0)
     					{
     						continue;
     					}
     					
-    					ItemStack tmpStack = ItemStack.copyItemStack((ItemStack)((ArrayList)obj).get(0)); // We copy the stack because we need to edit it slightly
+    					ItemStack tmpStack = ItemStack.copyItemStack((ItemStack)((ArrayList<?>)obj).get(0)); // We copy the stack because we need to edit it slightly
     				
 						if(!ContainsStack(ing, tmpStack, true))
 						{
@@ -422,13 +374,13 @@ public class RecipeInterceptor implements IRecipe
     	}
     }
     
-    public static ArrayList getCrafters(Container cont)
+    public static ArrayList<?> getCrafters(Container cont)
     {
     	try
     	{
         	Field craftField = Container.class.getDeclaredField("crafters");
         	craftField.setAccessible(true);
-        	return (ArrayList)craftField.get(cont);
+        	return (ArrayList<?>)craftField.get(cont);
     	} catch(Exception e)
     	{
     		RecipeResearch.logger.log(Level.ERROR, "Unable to get crafters for Container", e);

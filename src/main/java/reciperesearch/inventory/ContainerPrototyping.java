@@ -5,7 +5,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ICrafting;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import reciperesearch.blocks.TileEntityPrototyping;
@@ -22,6 +21,7 @@ public class ContainerPrototyping extends Container
     private int posY;
     private int posZ;
     
+	@SuppressWarnings("unchecked")
 	public ContainerPrototyping(EntityPlayer player, TileEntityPrototyping protoTile, int x, int y, int z)
 	{
 		this.protoTile = protoTile;
@@ -94,38 +94,16 @@ public class ContainerPrototyping extends Container
     }
 
     /**
-     * Callback for when the crafting matrix is changed.
-     */
-    public void onCraftMatrixChanged(IInventory invo)
-    {
-        //this.craftResult.setInventorySlotContents(0, CraftingManager.getInstance().findMatchingRecipe(this.craftMatrix, this.player.worldObj));
-    	
-    	
-    }
-
-    /**
      * Called when the container is closed.
      */
-    public void onContainerClosed(EntityPlayer player)
+    @SuppressWarnings("unchecked")
+	public void onContainerClosed(EntityPlayer player)
     {
         super.onContainerClosed(player);
         protoTile.crafters = this.crafters.size() - 1;
         ArrayList<EntityPlayer> users = new ArrayList<EntityPlayer>(this.crafters);
         users.remove(player);
         protoTile.setEfficiency(users);
-
-        /*if (!this.player.worldObj.isRemote)
-        {
-            for (int i = 0; i < this.protoTile.getSizeInventory(); ++i)
-            {
-                ItemStack itemstack = this.protoTile.getStackInSlotOnClosing(i);
-
-                if (itemstack != null)
-                {
-                    player.dropPlayerItemWithRandomChoice(itemstack, false);
-                }
-            }
-        }*/
     }
 
     public boolean canInteractWith(EntityPlayer player)
@@ -193,9 +171,4 @@ public class ContainerPrototyping extends Container
 
         return itemstack;
     }
-
-    /*public boolean func_94530_a(ItemStack stack, Slot slot)
-    {
-        return slot.inventory != this.craftResult && super.func_94530_a(stack, slot);
-    }*/
 }

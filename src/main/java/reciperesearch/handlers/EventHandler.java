@@ -4,7 +4,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import reciperesearch.core.RR_Settings;
 import reciperesearch.core.RecipeResearch;
 import reciperesearch.utils.ResearchHelper;
@@ -34,8 +33,11 @@ public class EventHandler
 	}
 	
 	@SubscribeEvent
-	public void onCrafting(ItemCraftedEvent event) // We can screw with recipe results here! (but syncing is a problem so we just handle all the post crafting stuffs)
+	public void onCrafting(ItemCraftedEvent event) // We could screw with recipe results here but it doesn't work for shift click crafting
 	{
+		// Because I'm paranoid about things interrupting the recipe interceptor we're going to check the recipe handler... yes again. Deal with it!
+		RecipeInterceptor.instance.checkAndResetIntercept();
+		
 		if(event.player.worldObj.isRemote)
 		{
 			return;
@@ -51,13 +53,5 @@ public class EventHandler
 		num = num < RR_Settings.practiceCap? MathHelper.clamp_int(num + RR_Settings.practiceWorth, resEff < 10? 10 : resEff, RR_Settings.practiceCap < resEff? resEff : RR_Settings.practiceCap) : num;
 		
 		ResearchHelper.setItemResearch(event.player, event.crafting, num);
-		
-		System.out.println("Recipe research for " + event.crafting.getDisplayName() + " is now at " + num);
-	}
-	
-	@SubscribeEvent
-	public void onTooltip(ItemTooltipEvent event)
-	{
-		// Should properly sync this data later
 	}
 }

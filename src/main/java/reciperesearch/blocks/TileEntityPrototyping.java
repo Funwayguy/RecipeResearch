@@ -140,6 +140,7 @@ public class TileEntityPrototyping extends TileEntity implements IInventory
     			NBTTagCompound resTags = output.getTagCompound();
     			resTags = resTags != null? resTags : new NBTTagCompound();
     			
+    			ItemStack outStack = ItemStack.loadItemStackFromNBT(resTags.getCompoundTag("Output"));
     			NBTTagList inTags = resTags.getTagList("Materials", 10);
     			
     			for(int i = 0; i < inTags.tagCount(); i++)
@@ -153,11 +154,15 @@ public class TileEntityPrototyping extends TileEntity implements IInventory
     				{
     					research = MathHelper.clamp_int(research + this.efficiency, 0, 100);
     					inTags.getCompoundTagAt(i).setInteger("Research", research);
-    					break;
+    					//break;
+    				} else if(ingStack != null && RecipeInterceptor.StackMatch(input, outStack))
+    				{
+    					research = MathHelper.clamp_int(research + (this.efficiency/2), 0, 100);
+    					inTags.getCompoundTagAt(i).setInteger("Research", research);
     				}
     			}
     			
-    			if(this.worldObj.rand.nextInt(this.efficiency) == 0)
+    			if(this.worldObj.rand.nextInt(10) == 0)
     			{
     				this.decrStackSize(0, 1);
     			}

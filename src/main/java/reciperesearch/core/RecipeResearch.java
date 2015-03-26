@@ -61,7 +61,7 @@ public class RecipeResearch
     	
     	proxy.registerHandlers();
     	
-    	CraftingManager.getInstance().getRecipeList().add(0, new RecipeInterceptor());
+    	CraftingManager.getInstance().getRecipeList().add(0, RecipeInterceptor.instance);
     }
     
     @EventHandler

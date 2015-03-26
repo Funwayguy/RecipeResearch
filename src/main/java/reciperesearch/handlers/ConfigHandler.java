@@ -40,6 +40,6 @@ public class ConfigHandler
 		
 		config.save();
 		
-		System.out.println("Loaded configs...");
+		RecipeResearch.logger.log(Level.INFO, "Loaded configs...");
 	}
 }
