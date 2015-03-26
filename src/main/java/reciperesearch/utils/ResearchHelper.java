@@ -2,7 +2,6 @@ package reciperesearch.utils;
 
 import java.util.Arrays;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -44,11 +43,6 @@ public class ResearchHelper
 			NBTTagCompound failTags = new NBTTagCompound();
 			failStack.writeToNBT(failTags);
 			stack.readFromNBT(failTags);
-			
-			/*if(player instanceof EntityPlayerMP)
-			{
-				((EntityPlayerMP)player).updateHeldItem();
-			}*/
 		}
 	}
 	

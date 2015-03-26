@@ -364,13 +364,21 @@ public class RecipeInterceptor implements IRecipe
     {
     	try
     	{
-	    	Field conField = InventoryCrafting.class.getDeclaredField("eventHandler");
+	    	Field conField = InventoryCrafting.class.getDeclaredField("field_70465_c");
 	    	conField.setAccessible(true);
 			return (Container)conField.get(invo);
     	} catch(Exception e)
     	{
-    		RecipeResearch.logger.log(Level.ERROR, "Unable to get container for InventoryCrafting", e);
-    		return null;
+    		try
+    		{
+    	    	Field conField = InventoryCrafting.class.getDeclaredField("eventHandler");
+    	    	conField.setAccessible(true);
+    			return (Container)conField.get(invo);
+    		} catch(Exception e1)
+    		{
+        		RecipeResearch.logger.log(Level.ERROR, "Unable to get container for InventoryCrafting", e1);
+        		return null;
+    		}
     	}
     }
     
@@ -378,13 +386,21 @@ public class RecipeInterceptor implements IRecipe
     {
     	try
     	{
-        	Field craftField = Container.class.getDeclaredField("crafters");
+        	Field craftField = Container.class.getDeclaredField("field_70465_c");
         	craftField.setAccessible(true);
         	return (ArrayList<?>)craftField.get(cont);
     	} catch(Exception e)
     	{
-    		RecipeResearch.logger.log(Level.ERROR, "Unable to get crafters for Container", e);
-    		return null;
+    		try
+    		{
+        	Field craftField = Container.class.getDeclaredField("crafters");
+        	craftField.setAccessible(true);
+        	return (ArrayList<?>)craftField.get(cont);
+    		} catch(Exception e1)
+    		{
+        		RecipeResearch.logger.log(Level.ERROR, "Unable to get crafters for Container", e);
+        		return null;
+    		}
     	}
     }
     
