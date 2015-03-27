@@ -14,21 +14,18 @@ public class ResearchHelper
 	public static void changeResult(EntityPlayer player, ItemStack stack)
 	{
 		String researchID = "";
+		String researchWild = "";
 		
 		if(stack != null && player != null)
 		{
-			researchID = Item.itemRegistry.getNameForObject(stack.getItem());
-			
-			if(stack.getItem().getHasSubtypes())
-			{
-				researchID = researchID + ":" + stack.getItemDamage();
-			}
+			researchWild = Item.itemRegistry.getNameForObject(stack.getItem());
+			researchID = researchWild + ":" + stack.getItemDamage();
 		} else
 		{
 			return; // There is no item to replace...
 		}
 		
-		if(player.worldObj.isRemote || Arrays.asList(RR_Settings.recipeWhitelist).contains(researchID)) // Either no-one is crafting this recipe or the item is white listed
+		if(player.worldObj.isRemote || Arrays.asList(RR_Settings.recipeWhitelist).contains(researchID) || Arrays.asList(RR_Settings.recipeWhitelist).contains(researchWild)) // Either no-one is crafting this recipe or the item is white listed
 		{
 			return;
 		}
