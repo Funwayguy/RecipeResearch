@@ -28,39 +28,37 @@ public class GuiPrototyping extends GuiContainer
 		super(new ContainerPrototyping(player, protoTile, x, y, z));
 		this.player = player;
 	}
-
-    /**
-     * Draw the foreground layer for the GuiContainer (everything in front of the items)
-     */
-    protected void drawGuiContainerForegroundLayer(int p_146979_1_, int p_146979_2_)
-    {
-        this.fontRendererObj.drawString(I18n.format("container.inventory", new Object[0]), 8, this.ySize - 96 + 4, 4210752);
-    }
-
+	
 	@Override
-	protected void drawGuiContainerBackgroundLayer(float p_146976_1_, int p_146976_2_, int p_146976_3_)
+	public void drawScreen(int mx, int my, float partialTick)
 	{
+		GL11.glPushMatrix();
+		super.drawScreen(mx, my, partialTick);
+		GL11.glPopMatrix();
+		
+		GL11.glPushMatrix();
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        
         this.mc.getTextureManager().bindTexture(craftingTableGuiTextures);
         int k = (this.width - this.xSize) / 2;
         int l = (this.height - this.ySize) / 2;
-        this.drawTexturedModalRect(k, l, 0, 0, this.xSize, this.ySize);
-        
-        int progress = ((ContainerPrototyping)this.inventorySlots).protoTile.progress;
-        this.drawTexturedModalRect(k + 16, l + 24, 96, 168, 24, MathHelper.ceiling_float_int(48F * (float)progress/60F));
         
         if(this.inventorySlots.getSlot(2).getHasStack())
         {
-            this.drawTexturedModalRect(k + 40, l + 8, 0, 168, 96, 64);
-            
             NBTTagCompound stackTags = this.inventorySlots.getSlot(2).getStack().getTagCompound();
             stackTags = stackTags != null? stackTags : new NBTTagCompound();
             
             ItemStack outStack = ItemStack.loadItemStackFromNBT(stackTags.getCompoundTag("Output"));
             
             this.drawItemStack(outStack, k + 112, l + 32, "");
+            if(this.func_146978_c(112, 32, 16, 16, mx, my))
+            {
+            	this.renderToolTip(outStack, mx, my);
+            }
             
             NBTTagList inputs = stackTags.getTagList("Materials", 10);
+        	
+        	ItemStack toolTipStack = null;
             
             for(int i = 0; i < inputs.tagCount() && i < 9; i++)
             {
@@ -103,12 +101,49 @@ public class GuiPrototyping extends GuiContainer
             			}
             			
         				this.drawItemStack(tmpStack, k + 47 + rx, l + 15 + ry, (research < 25? EnumChatFormatting.RED : (research < 75? EnumChatFormatting.YELLOW : EnumChatFormatting.GREEN)) + (research < 100? research + "%" : ""));
+        	            if(this.func_146978_c(47 + rx, 15 + ry, 16, 16, mx, my))
+        	            {
+        	            	toolTipStack = tmpStack;
+        	            }
             		}
             	} else
             	{
         	        this.fontRendererObj.drawString("X", k + 53 + rx, l + 20 + ry, 4210752);
             	}
             }
+        	
+        	if(toolTipStack != null)
+        	{
+        		this.renderToolTip(toolTipStack, mx, my);
+        	}
+        }
+        
+        GL11.glPopMatrix();
+	}
+
+    /**
+     * Draw the foreground layer for the GuiContainer (everything in front of the items)
+     */
+    protected void drawGuiContainerForegroundLayer(int p_146979_1_, int p_146979_2_)
+    {
+        this.fontRendererObj.drawString(I18n.format("container.inventory", new Object[0]), 8, this.ySize - 96 + 4, 4210752);
+    }
+
+	@Override
+	protected void drawGuiContainerBackgroundLayer(float p_146976_1_, int mx, int my)
+	{
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        this.mc.getTextureManager().bindTexture(craftingTableGuiTextures);
+        int k = (this.width - this.xSize) / 2;
+        int l = (this.height - this.ySize) / 2;
+        this.drawTexturedModalRect(k, l, 0, 0, this.xSize, this.ySize);
+        
+        int progress = ((ContainerPrototyping)this.inventorySlots).protoTile.progress;
+        this.drawTexturedModalRect(k + 16, l + 24, 96, 168, 24, MathHelper.ceiling_float_int(48F * (float)progress/60F));
+        
+        if(this.inventorySlots.getSlot(2).getHasStack())
+        {
+            this.drawTexturedModalRect(k + 40, l + 8, 0, 168, 96, 64);
         }
 	}
 

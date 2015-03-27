@@ -19,7 +19,7 @@ public class ResearchHelper
 		{
 			researchID = Item.itemRegistry.getNameForObject(stack.getItem());
 			
-			if(stack.getItem().isDamageable())
+			if(stack.getItem().getHasSubtypes())
 			{
 				researchID = researchID + ":" + stack.getItemDamage();
 			}
@@ -54,7 +54,7 @@ public class ResearchHelper
 		}
 		
 		String itemID = Item.itemRegistry.getNameForObject(stack.getItem());
-		String researchID = !stack.getItem().isDamageable()? itemID : itemID + ":" + stack.getItemDamage();
+		String researchID = !stack.getItem().getHasSubtypes()? itemID : itemID + ":" + stack.getItemDamage();
 		NBTTagCompound allResearch = getPersistentNBT(player).getCompoundTag("RecipeResearch");
 		return allResearch.getInteger(researchID);
 	}
@@ -78,7 +78,7 @@ public class ResearchHelper
 		}
 		
 		String itemID = Item.itemRegistry.getNameForObject(stack.getItem());
-		String researchID = !stack.getItem().isDamageable()? itemID : itemID + ":" + stack.getItemDamage();
+		String researchID = !stack.getItem().getHasSubtypes()? itemID : itemID + ":" + stack.getItemDamage();
 		NBTTagCompound allResearch = getPersistentNBT(player).getCompoundTag("RecipeResearch");
 		allResearch.setInteger(researchID, allResearch.getInteger(researchID) + amount);
 		
@@ -95,7 +95,7 @@ public class ResearchHelper
 		}
 		
 		String itemID = Item.itemRegistry.getNameForObject(stack.getItem());
-		String researchID = !stack.getItem().isDamageable()? itemID : itemID + ":" + stack.getItemDamage();
+		String researchID = !stack.getItem().getHasSubtypes()? itemID : itemID + ":" + stack.getItemDamage();
 		NBTTagCompound allResearch = getPersistentNBT(player).getCompoundTag("RecipeResearch");
 		allResearch.setInteger(researchID, amount);
 		

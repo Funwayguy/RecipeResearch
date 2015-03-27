@@ -123,31 +123,15 @@ public class ContainerPrototyping extends Container
         {
             ItemStack itemstack1 = slot.getStack();
             itemstack = itemstack1.copy();
-
-            if (index == 0)
+            
+            if (index < 3)
             {
-                if (!this.mergeItemStack(itemstack1, 3, 39, true))
-                {
-                    return null;
-                }
-
-                slot.onSlotChange(itemstack1, itemstack);
-            }
-            else if (index >= 3 && index < 30)
-            {
-                if (!this.mergeItemStack(itemstack1, 30, 39, false))
+                if (!this.mergeItemStack(itemstack1, 3, 39, false))
                 {
                     return null;
                 }
             }
-            else if (index >= 30 && index < 39)
-            {
-                if (!this.mergeItemStack(itemstack1, 3, 30, false))
-                {
-                    return null;
-                }
-            }
-            else if (!this.mergeItemStack(itemstack1, 3, 39, false))
+            else if (!this.mergeItemStack(itemstack1, 0, 3, false))
             {
                 return null;
             }
