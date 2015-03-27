@@ -22,7 +22,7 @@ group= "reciperesearch" // http://maven.apache.org/guides/mini/guide-naming-conv
 archivesBaseName = "RecipeResearch"
 
 minecraft {
-    version = "1.7.10-10.13.2.1230"
+    version = "1.7.10-10.13.2.1291"
 }
 
 dependencies {

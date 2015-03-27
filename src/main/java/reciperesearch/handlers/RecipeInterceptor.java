@@ -386,19 +386,19 @@ public class RecipeInterceptor implements IRecipe
     {
     	try
     	{
-        	Field craftField = Container.class.getDeclaredField("field_70465_c");
+        	Field craftField = Container.class.getDeclaredField("field_75149_d");
         	craftField.setAccessible(true);
         	return (ArrayList<?>)craftField.get(cont);
     	} catch(Exception e)
     	{
     		try
     		{
-        	Field craftField = Container.class.getDeclaredField("crafters");
-        	craftField.setAccessible(true);
-        	return (ArrayList<?>)craftField.get(cont);
+	        	Field craftField = Container.class.getDeclaredField("crafters");
+	        	craftField.setAccessible(true);
+	        	return (ArrayList<?>)craftField.get(cont);
     		} catch(Exception e1)
     		{
-        		RecipeResearch.logger.log(Level.ERROR, "Unable to get crafters for Container", e);
+        		RecipeResearch.logger.log(Level.ERROR, "Unable to get crafters for Container", e1);
         		return null;
     		}
     	}
