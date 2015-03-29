@@ -1,5 +1,6 @@
 package reciperesearch.handlers;
 
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.config.Configuration;
 import org.apache.logging.log4j.Level;
 import reciperesearch.core.RR_Settings;
@@ -35,11 +36,29 @@ public class ConfigHandler
 		RR_Settings.practiceWorth = config.getInt("Practice Worth", Configuration.CATEGORY_GENERAL, 1, 0, 100, "The increase in a player's knowledge of a recipe by successfully crafting it");
 		RR_Settings.practiceCap = config.getInt("Practice Cap", Configuration.CATEGORY_GENERAL, 90, 0, 100, "The limit of research a player can earn through practice without using a textbook");
 		RR_Settings.recipeWhitelist = config.getStringList("Item Whitelist", Configuration.CATEGORY_GENERAL, defWhitelist, "Which items can be crafted without knowledge limitations");
-		RR_Settings.hideRecipes = config.getBoolean("Hide Recipes", Configuration.CATEGORY_GENERAL, true, "Hides recipes from the recipe listing and NEI, may cause issues"); // WIP
+		RR_Settings.hideRecipes = config.getBoolean("Hide Recipes", Configuration.CATEGORY_GENERAL, true, "Hides recipes from the recipe listing and NEI, may cause issues");
 		RR_Settings.persistResearch = config.getBoolean("Persistent Research", Configuration.CATEGORY_GENERAL, false, "Should a player lose all their knowledge when they die? (This option is evil)");
 		
 		config.save();
 		
 		RecipeResearch.logger.log(Level.INFO, "Loaded configs...");
+	}
+	
+	/**
+	 * Returns a compound tag representing the configuration settings that need to be synchronized between server and client
+	 * @return
+	 */
+	public static NBTTagCompound getServerConfigs()
+	{
+		NBTTagCompound tags = new NBTTagCompound();
+		
+		tags.setBoolean("hideRecipes", RR_Settings.hideRecipes);
+		
+		return tags;
+	}
+	
+	public static void setServerConfigs(NBTTagCompound tags)
+	{
+		RR_Settings.hideRecipes = tags.getBoolean("hideRecipes");
 	}
 }

@@ -9,7 +9,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MathHelper;
 import reciperesearch.core.RecipeResearch;
-import reciperesearch.handlers.RecipeInterceptor;
+import reciperesearch.utils.RecipeHelper;
 import reciperesearch.utils.ResearchHelper;
 
 public class TileEntityPrototyping extends TileEntity implements IInventory
@@ -109,7 +109,7 @@ public class TileEntityPrototyping extends TileEntity implements IInventory
     			
     			NBTTagList inTags = new NBTTagList();
     			
-    			ArrayList<ItemStack> ingredients = RecipeInterceptor.getIngredients(input);
+    			ArrayList<ItemStack> ingredients = RecipeHelper.getIngredients(input);
     			
     			if(ingredients.size() > 0)
     			{
@@ -150,12 +150,12 @@ public class TileEntityPrototyping extends TileEntity implements IInventory
     				int research = ingTag.getInteger("Research");
     				boolean oreDict = ingTag.getBoolean("UseOreDict");
     				
-    				if(ingStack != null && (oreDict? RecipeInterceptor.AllMatch(ingStack, input) : RecipeInterceptor.StackMatch(ingStack, input)))
+    				if(ingStack != null && (oreDict? RecipeHelper.AllMatch(ingStack, input) : RecipeHelper.StackMatch(ingStack, input)))
     				{
     					research = MathHelper.clamp_int(research + this.efficiency, 0, 100);
     					inTags.getCompoundTagAt(i).setInteger("Research", research);
     					//break;
-    				} else if(ingStack != null && RecipeInterceptor.StackMatch(input, outStack))
+    				} else if(ingStack != null && RecipeHelper.StackMatch(input, outStack))
     				{
     					research = MathHelper.clamp_int(research + (this.efficiency/2), 0, 100);
     					inTags.getCompoundTagAt(i).setInteger("Research", research);

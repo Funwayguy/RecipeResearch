@@ -16,6 +16,8 @@ import reciperesearch.handlers.ConfigHandler;
 import reciperesearch.handlers.RecipeInterceptor;
 import reciperesearch.items.ItemRecipeTextbook;
 import reciperesearch.items.ItemResearch;
+import reciperesearch.utils.RecipeHelper;
+import reciperesearch.utils.ResearchHelper;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
@@ -41,7 +43,7 @@ public class RecipeResearch
 	
 	@SidedProxy(clientSide = PROXY + ".ClientProxy", serverSide = PROXY + ".CommonProxy")
 	public static CommonProxy proxy;
-	public SimpleNetworkWrapper network ;
+	public SimpleNetworkWrapper network;
 	public static Logger logger;
 	
 	public static Block prototypeTable;
@@ -82,6 +84,7 @@ public class RecipeResearch
     	GameRegistry.registerTileEntity(TileEntityPrototyping.class, "tile.prototyping");
     	
     	GameRegistry.addShapelessRecipe(new ItemStack(prototypeTable), new ItemStack(Blocks.crafting_table), new ItemStack(Items.writable_book));
+    	GameRegistry.addShapelessRecipe(ResearchHelper.getBook(), new ItemStack(prototypeTable), new ItemStack(Items.book));
     	GameRegistry.addShapedRecipe(new ItemStack(textbook, 1, 0), "xxx", "xox", "xxx", 'x', new ItemStack(Items.book), 'o', new ItemStack(Blocks.crafting_table));
     	GameRegistry.addShapedRecipe(new ItemStack(textbook, 1, 1), "xxx", "xox", "xxx", 'x', new ItemStack(textbook, 1, 0), 'o', new ItemStack(Blocks.crafting_table));
     	GameRegistry.addShapedRecipe(new ItemStack(textbook, 1, 2), "xxx", "xox", "xxx", 'x', new ItemStack(textbook, 1, 1), 'o', new ItemStack(Blocks.crafting_table));
@@ -90,9 +93,9 @@ public class RecipeResearch
     @EventHandler
     public void postInit(FMLPostInitializationEvent event)
     {
-    	if(RR_Settings.hideRecipes)
+    	if(RR_Settings.hideRecipes && proxy.isClient())
     	{
-    		RecipeInterceptor.HideAll();
+    		RecipeHelper.HideAll();
     	}
     }
 }

@@ -10,3 +10,5 @@ tile.reciperesearch.prototype_table.name=Prototyping Table
 reciperesearch.chat.incomplete=Research incomplete
 reciperesearch.chat.perfected=Perfected %s recipe!
 reciperesearch.chat.efficiency=Base crafting increased to %s
+
+reciperesearch.tooltip.research=Research: %s

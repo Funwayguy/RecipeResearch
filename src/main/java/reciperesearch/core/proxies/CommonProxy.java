@@ -4,8 +4,10 @@ import net.minecraftforge.common.MinecraftForge;
 import reciperesearch.core.RecipeResearch;
 import reciperesearch.handlers.EventHandler;
 import reciperesearch.handlers.GuiHandler;
+import reciperesearch.network.ResearchPacket;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.relauncher.Side;
 
 public class CommonProxy
 {
@@ -20,5 +22,6 @@ public class CommonProxy
 		MinecraftForge.EVENT_BUS.register(handler);
 		FMLCommonHandler.instance().bus().register(handler);
 		NetworkRegistry.INSTANCE.registerGuiHandler(RecipeResearch.instance, new GuiHandler());
+		RecipeResearch.instance.network.registerMessage(ResearchPacket.HandleServer.class, ResearchPacket.class, 0, Side.SERVER);
 	}
 }
