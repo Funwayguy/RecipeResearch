@@ -5,6 +5,7 @@ package reciperesearch.core;
  */
 public class RR_Settings
 {
+	public static boolean hideUpdates = false;
 	public static String[] recipeWhitelist = new String[]{};
 	public static boolean shareKnowledge = false;
 	public static int practiceWorth = 1;

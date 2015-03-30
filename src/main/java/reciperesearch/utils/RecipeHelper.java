@@ -2,6 +2,7 @@ package reciperesearch.utils;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryCrafting;
@@ -24,6 +25,7 @@ import reciperesearch.handlers.RecipeInterceptor;
 public class RecipeHelper
 {
 	static ArrayList<IRecipe> allRecipes = new ArrayList<IRecipe>();
+	static HashMap<ItemStack, ArrayList<ItemStack>> customIngredients = new HashMap<ItemStack, ArrayList<ItemStack>>();
 	
 	/**
 	 * Helper class for partial recipes
@@ -41,12 +43,28 @@ public class RecipeHelper
 	}
 	
 	/**
-	 * An array of recipes that should be unlocked next refresh pass.
+	 * An array of recipes that should be unlocked next refresh pass. Necessary for recipes with conditional outputs
 	 */
 	public static ArrayList<IRecipe> scheduledUnlocks = new ArrayList<IRecipe>();
 	
 	/**
-	 * Iterate through all hidden recipes to see if any should be unhidden to the given player
+	 * Replaces an item's ingredient listing used for research (appends if an entry already exists)
+	 * @param recipe
+	 * @param ingredients
+	 */
+	public static void SetCustomIngredients(ItemStack item, ArrayList<ItemStack> ingredients)
+	{
+		if(customIngredients.containsKey(item))
+		{
+			customIngredients.get(item).addAll(ingredients);
+		} else
+		{
+			customIngredients.put(item, ingredients);
+		}
+	}
+	
+	/**
+	 * Refresh all hidden recipes to see if any should be unhidden to the given player (recipes without results are unhidden by default)
 	 * @param player
 	 */
 	@SuppressWarnings("unchecked")
@@ -61,6 +79,17 @@ public class RecipeHelper
 			
 			for(int i = allRecipes.size() - 1; i >= 0; i--)
 			{
+				if(i >= allRecipes.size())
+				{
+					RecipeResearch.logger.log(Level.ERROR, "Something modified the hidden recipe listing mid loop!", new IllegalStateException());
+					i = allRecipes.size() - 1;
+					
+					if(i < 0)
+					{
+						break;
+					}
+				}
+				
 				IRecipe recipe = allRecipes.get(i);
 				
 				if(scheduledUnlocks.contains(recipe))
@@ -75,7 +104,7 @@ public class RecipeHelper
 				{
 					CraftingManager.getInstance().getRecipeList().add(recipe);
 				}
-				allRecipes.remove(i);
+				allRecipes.remove(recipe);
 			}
 		}
 	}
@@ -113,36 +142,64 @@ public class RecipeHelper
 	}
 	
 	/**
-	 * Send hide all recipes regardless of research values
+	 * Hide all recipes regardless of research values
 	 */
 	public static void HideAll()
 	{
-		for(int i = CraftingManager.getInstance().getRecipeList().size() - 1; i >= 1; i--) // DO NOT remove index 0. That is reserved for the intercepter
+		for(int i = CraftingManager.getInstance().getRecipeList().size() - 1; i >= 0; i--)
 		{
+			if(i >= CraftingManager.getInstance().getRecipeList().size())
+			{
+				RecipeResearch.logger.log(Level.ERROR, "Something modified the vanilla recipe listing mid loop!", new IllegalStateException());
+				i = CraftingManager.getInstance().getRecipeList().size() - 1;
+				
+				if(i < 0)
+				{
+					break;
+				}
+			}
+			
 			IRecipe recipe = (IRecipe)CraftingManager.getInstance().getRecipeList().get(i);
+			
+			if(recipe instanceof RecipeInterceptor)
+			{
+				continue;
+			}
 			
 			if(recipe != null && !allRecipes.contains(recipe))
 			{
 				allRecipes.add(recipe);
 			}
-			CraftingManager.getInstance().getRecipeList().remove(i);
+			
+			CraftingManager.getInstance().getRecipeList().remove(recipe);
 		}
 	}
 	
 	/**
-	 * Unhide all recipes
+	 * Restore all hidden recipes to the vanilla recipe listing
 	 */
 	@SuppressWarnings("unchecked")
 	public static void UnHideAll()
 	{
 		for(int i = allRecipes.size() - 1; i >= 0; i--)
 		{
+			if(i >= allRecipes.size())
+			{
+				RecipeResearch.logger.log(Level.ERROR, "Something modified the hidden recipe listing mid loop!", new IllegalStateException());
+				i = allRecipes.size() - 1;
+				
+				if(i < 0)
+				{
+					break;
+				}
+			}
+			
 			IRecipe recipe = allRecipes.get(i);
 			if(recipe != null && !CraftingManager.getInstance().getRecipeList().contains(recipe))
 			{
 				CraftingManager.getInstance().getRecipeList().add(recipe);
 			}
-			allRecipes.remove(i);
+			allRecipes.remove(recipe);
 		}
 	}
 	
@@ -232,6 +289,14 @@ public class RecipeHelper
     	if(stack == null)
     	{
     		return ing;
+    	}
+    	
+    	for(ItemStack customStack : customIngredients.keySet())
+    	{
+    		if(StackMatch(customStack, stack))
+    		{
+    			return customIngredients.get(customStack);
+    		}
     	}
     	
     	boolean flag = false; // Should the normal recipes not return anything then we shall add the item itself as a research item

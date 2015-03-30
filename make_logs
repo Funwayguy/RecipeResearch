@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+##############################################################################
+##
+##  Changelog creation script for use with Git Shell & Drone.io
+##  Created by Funwayguy for RecipeResearch
+##
+##############################################################################
+
+# Create document for update notice
+echo $ver_num > version.txt
+echo "http://minecraft.curseforge.com/mc-mods/228907-reciperesearch" >> version.txt
+git log -1 --pretty=format:"%B" >> version.txt

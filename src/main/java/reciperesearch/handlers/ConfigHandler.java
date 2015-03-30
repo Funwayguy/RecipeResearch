@@ -38,6 +38,7 @@ public class ConfigHandler
 		RR_Settings.recipeWhitelist = config.getStringList("Item Whitelist", Configuration.CATEGORY_GENERAL, defWhitelist, "Which items can be crafted without knowledge limitations");
 		RR_Settings.hideRecipes = config.getBoolean("Hide Recipes", Configuration.CATEGORY_GENERAL, true, "Hides recipes from the recipe listing and NEI, may cause issues");
 		RR_Settings.persistResearch = config.getBoolean("Persistent Research", Configuration.CATEGORY_GENERAL, false, "Should a player lose all their knowledge when they die? (This option is evil)");
+		RR_Settings.hideUpdates = config.getBoolean("Hide Updates", Configuration.CATEGORY_GENERAL, false, "Hides update notifications");
 		
 		config.save();
 		
