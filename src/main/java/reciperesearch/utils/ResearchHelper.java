@@ -100,7 +100,7 @@ public class ResearchHelper
 		}
 		
 		int tmp = getPersistentNBT(player).getInteger("ResearchEff");
-		return tmp <= 0? 1 : tmp;
+		return tmp <= RR_Settings.startKnowledge? RR_Settings.startKnowledge : tmp;
 	}
 	
 	/**

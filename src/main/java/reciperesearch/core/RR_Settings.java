@@ -10,6 +10,8 @@ public class RR_Settings
 	public static boolean shareKnowledge = false;
 	public static int practiceWorth = 1;
 	public static int practiceCap = 90;
+	public static int startKnowledge = 10;
 	public static boolean hideRecipes = false;
 	public static boolean persistResearch = true;
+	public static boolean claimIncomplete = false;
 }

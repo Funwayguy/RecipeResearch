@@ -7,6 +7,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import reciperesearch.core.RR_Settings;
@@ -53,20 +54,36 @@ public class ItemResearch extends Item
 			return stack;
 		}
 		
+		float total = matList.tagCount() * 100F;
+		int current = 0;
+		
 		for(int i = 0; i < matList.tagCount(); i++)
 		{
 			NBTTagCompound ingredient = matList.getCompoundTagAt(i);
+			current += ingredient.getInteger("Research");
+		}
+		
+		if(current < total)
+		{
+			int pageResearch = MathHelper.floor_float((float)current/total * 100F);
+			player.addChatComponentMessage(new ChatComponentText(StatCollector.translateToLocal("reciperesearch.chat.incomplete") + " (" + pageResearch + "%)"));
 			
-			if(ingredient.getInteger("Research") < 100)
+			if(RR_Settings.claimIncomplete)
 			{
-				player.addChatComponentMessage(new ChatComponentText(StatCollector.translateToLocal("reciperesearch.chat.incomplete")));
-				return stack;
+				ResearchHelper.addItemResearch(player, outStack, pageResearch);
+				
+				if(!player.capabilities.isCreativeMode && !RR_Settings.shareKnowledge)
+				{
+					--stack.stackSize;
+				}
 			}
+			
+			return stack;
 		}
 		
 		player.addChatComponentMessage(new ChatComponentText(StatCollector.translateToLocalFormatted("reciperesearch.chat.perfected", outStack.getDisplayName())));
 		
-		ResearchHelper.setItemResearch(player, outStack, 100);
+		ResearchHelper.setItemResearch(player, outStack, MathHelper.floor_float((float)current/total * 100F));
 		
 		if(!player.capabilities.isCreativeMode && !RR_Settings.shareKnowledge)
 		{

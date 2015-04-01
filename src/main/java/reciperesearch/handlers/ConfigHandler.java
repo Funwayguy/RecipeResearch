@@ -35,10 +35,12 @@ public class ConfigHandler
 		RR_Settings.shareKnowledge = config.getBoolean("Share Knowledge", Configuration.CATEGORY_GENERAL, false, "Whether or not players should be allowed to share their research notes and textbooks");
 		RR_Settings.practiceWorth = config.getInt("Practice Worth", Configuration.CATEGORY_GENERAL, 1, 0, 100, "The increase in a player's knowledge of a recipe by successfully crafting it");
 		RR_Settings.practiceCap = config.getInt("Practice Cap", Configuration.CATEGORY_GENERAL, 90, 0, 100, "The limit of research a player can earn through practice without using a textbook");
+		RR_Settings.startKnowledge = config.getInt("Starting Knowledge", Configuration.CATEGORY_GENERAL, 10, 0, 100, "What amount of crafting knowledge the player will start with");
 		RR_Settings.recipeWhitelist = config.getStringList("Item Whitelist", Configuration.CATEGORY_GENERAL, defWhitelist, "Which items can be crafted without knowledge limitations");
 		RR_Settings.hideRecipes = config.getBoolean("Hide Recipes", Configuration.CATEGORY_GENERAL, true, "Hides recipes from the recipe listing and NEI, may cause issues");
 		RR_Settings.persistResearch = config.getBoolean("Persistent Research", Configuration.CATEGORY_GENERAL, false, "Should a player lose all their knowledge when they die? (This option is evil)");
 		RR_Settings.hideUpdates = config.getBoolean("Hide Updates", Configuration.CATEGORY_GENERAL, false, "Hides update notifications");
+		RR_Settings.claimIncomplete = config.getBoolean("Allow Incomplete Research", Configuration.CATEGORY_GENERAL, false, "Allow players to claim incomplete research pages");
 		
 		config.save();
 		
@@ -54,6 +56,7 @@ public class ConfigHandler
 		NBTTagCompound tags = new NBTTagCompound();
 		
 		tags.setBoolean("hideRecipes", RR_Settings.hideRecipes);
+		tags.setBoolean("claimIncomplete", RR_Settings.claimIncomplete);
 		
 		return tags;
 	}
@@ -61,5 +64,6 @@ public class ConfigHandler
 	public static void setServerConfigs(NBTTagCompound tags)
 	{
 		RR_Settings.hideRecipes = tags.getBoolean("hideRecipes");
+		RR_Settings.claimIncomplete = tags.getBoolean("claimIncomplete");
 	}
 }
