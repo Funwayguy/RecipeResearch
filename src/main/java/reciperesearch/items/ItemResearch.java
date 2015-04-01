@@ -68,9 +68,9 @@ public class ItemResearch extends Item
 			int pageResearch = MathHelper.floor_float((float)current/total * 100F);
 			player.addChatComponentMessage(new ChatComponentText(StatCollector.translateToLocal("reciperesearch.chat.incomplete") + " (" + pageResearch + "%)"));
 			
-			if(RR_Settings.claimIncomplete)
+			if(RR_Settings.claimIncomplete && ResearchHelper.getItemResearch(player, outStack) < pageResearch)
 			{
-				ResearchHelper.addItemResearch(player, outStack, pageResearch);
+				ResearchHelper.setItemResearch(player, outStack, pageResearch);
 				
 				if(!player.capabilities.isCreativeMode && !RR_Settings.shareKnowledge)
 				{
