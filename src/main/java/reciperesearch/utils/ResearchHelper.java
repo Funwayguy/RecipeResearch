@@ -10,6 +10,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.MathHelper;
+import net.minecraftforge.oredict.OreDictionary;
 import reciperesearch.core.RR_Settings;
 import reciperesearch.core.RecipeResearch;
 import reciperesearch.network.ResearchPacket;
@@ -60,7 +61,24 @@ public class ResearchHelper
 			return false; // There is no item to replace...
 		}
 		
-		return Arrays.asList(RR_Settings.recipeWhitelist).contains(researchID) || Arrays.asList(RR_Settings.recipeWhitelist).contains(researchWild);
+		for(String listing : RR_Settings.recipeWhitelist)
+		{
+			if(listing.equalsIgnoreCase(researchID) || listing.equalsIgnoreCase(researchWild)) // Direct match
+			{
+				return true;
+			} else if(Arrays.asList(OreDictionary.getOreNames()).contains(listing.replaceFirst("ore:", ""))) // OreDictionary
+			{
+				for(ItemStack oreStack : OreDictionary.getOres(listing.replaceFirst("ore:", "")))
+				{
+					if(RecipeHelper.StackMatch(stack, oreStack))
+					{
+						return true;
+					}
+				}
+			}
+		}
+		
+		return false;
 	}
 	
 	/**
