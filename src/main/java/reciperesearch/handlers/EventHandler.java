@@ -110,12 +110,29 @@ public class EventHandler
 	@SubscribeEvent
 	public void onToolTip(ItemTooltipEvent event)
 	{
-		if(event.itemStack == null || event.entityPlayer == null)
+		if(event.itemStack == null || event.entityPlayer == null || event.entityPlayer.openContainer == null)
 		{
 			return;
 		}
 		
-		int research = ResearchHelper.getItemResearch(event.entityPlayer, event.itemStack);
-		event.toolTip.add(StatCollector.translateToLocalFormatted("reciperesearch.tooltip.research", research + "%"));
+		if(RecipeResearch.proxy.isClient())
+		{
+			boolean flag = false;
+			
+			for(StackTraceElement trace : new Exception().getStackTrace())
+			{
+				if(trace.getMethodName().equals("drawScreen") || trace.getMethodName().equals("func_73863_a"))
+				{
+					flag = true;
+					break;
+				}
+			}
+			
+			if(flag)
+			{
+				int research = ResearchHelper.getItemResearch(event.entityPlayer, event.itemStack);
+				event.toolTip.add(StatCollector.translateToLocalFormatted("reciperesearch.tooltip.research", research + "%"));
+			}
+		}
 	}
 }
