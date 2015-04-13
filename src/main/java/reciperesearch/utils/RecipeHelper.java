@@ -309,7 +309,7 @@ public class RecipeHelper
     	{
     		IRecipe recipe = tmpListing.get(i);
     		
-    		if(recipe == null || recipe.getRecipeOutput() == null || recipe.getRecipeOutput().getItem() != stack.getItem() || recipe.getRecipeOutput().getItemDamage() != stack.getItemDamage() || recipe.getRecipeOutput().getItemDamage() == Short.MAX_VALUE)
+    		if(recipe == null || recipe.getRecipeOutput() == null || recipe.getRecipeOutput().getItem() == null || recipe.getRecipeOutput().getItem() != stack.getItem() || recipe.getRecipeOutput().getItemDamage() != stack.getItemDamage() || recipe.getRecipeOutput().getItemDamage() == Short.MAX_VALUE)
     		{
     			continue;
     		}
@@ -510,6 +510,11 @@ public class RecipeHelper
      */
     public static boolean StackMatch(ItemStack stack1, ItemStack stack2)
     {
+    	if(stack1 == null || stack2 == null || stack1.getItem() == null || stack2.getItem() == null) // NPE checks
+    	{
+    		return false;
+    	}
+    	
     	return stack1.getItem() == stack2.getItem() && (stack1.getItemDamage() == stack2.getItemDamage() || stack1.getItem().isDamageable() || stack1.getItemDamage() == OreDictionary.WILDCARD_VALUE);
     }
     
@@ -521,6 +526,11 @@ public class RecipeHelper
      */
     public static boolean OreDictionaryMatch(ItemStack stack, String name)
     {
+    	if(stack == null || stack.getItem() == null) // NPE checks
+    	{
+    		return false;
+    	}
+    	
     	for(ItemStack oreStack : OreDictionary.getOres(name))
     	{
     		if(StackMatch(stack, oreStack))
@@ -540,6 +550,11 @@ public class RecipeHelper
      */
     public static boolean AllMatch(ItemStack stack1, ItemStack stack2)
     {
+    	if(stack1 == null || stack2 == null || stack1.getItem() == null || stack2.getItem() == null) // NPE checks
+    	{
+    		return false;
+    	}
+    	
     	if(StackMatch(stack1, stack2))
     	{
     		return true;
@@ -564,6 +579,11 @@ public class RecipeHelper
     public static ArrayList<ItemStack> getAllOreSiblings(ItemStack stack)
     {
     	ArrayList<ItemStack> list = new ArrayList<ItemStack>();
+    	
+    	if(stack == null || stack.getItem() == null) // NPE checks
+    	{
+    		return list;
+    	}
     	
     	for(int id : OreDictionary.getOreIDs(stack))
     	{

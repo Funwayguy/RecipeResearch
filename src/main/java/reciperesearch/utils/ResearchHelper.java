@@ -52,7 +52,7 @@ public class ResearchHelper
 		String researchID = "";
 		String researchWild = "";
 		
-		if(stack != null)
+		if(stack != null && stack.getItem() != null)
 		{
 			researchWild = Item.itemRegistry.getNameForObject(stack.getItem());
 			researchID = researchWild + ":" + stack.getItemDamage();
@@ -89,7 +89,7 @@ public class ResearchHelper
 	 */
 	public static int getItemResearch(EntityPlayer player, ItemStack stack)
 	{
-		if(player == null || stack == null)
+		if(player == null || stack == null || stack.getItem() == null)
 		{
 			return 0;
 		}
@@ -129,7 +129,7 @@ public class ResearchHelper
 	 */
 	public static void addItemResearch(EntityPlayer player, ItemStack stack, int amount)
 	{
-		if(player == null || stack == null)
+		if(player == null || stack == null || stack.getItem() == null)
 		{
 			return;
 		}
@@ -157,7 +157,7 @@ public class ResearchHelper
 	 */
 	public static void setItemResearch(EntityPlayer player, ItemStack stack, int amount)
 	{
-		if(player == null || stack == null)
+		if(player == null || stack == null || stack.getItem() == null)
 		{
 			return;
 		}

@@ -25,6 +25,7 @@ public class BlockPrototypeTable extends Block implements ITileEntityProvider
 	public BlockPrototypeTable()
 	{
 		super(Material.wood);
+		this.setHardness(2.5F);
 		this.setBlockTextureName(RecipeResearch.MODID + ":prototype_table");
 		this.setCreativeTab(CreativeTabs.tabDecorations);
 		this.setBlockName("reciperesearch.prototype_table");
@@ -73,7 +74,7 @@ public class BlockPrototypeTable extends Block implements ITileEntityProvider
             {
                 ItemStack itemstack = tileentity.getStackInSlot(i1);
 
-                if (itemstack != null)
+                if (itemstack != null && itemstack.getItem() != null)
                 {
                     float f = world.rand.nextFloat() * 0.8F + 0.1F;
                     float f1 = world.rand.nextFloat() * 0.8F + 0.1F;

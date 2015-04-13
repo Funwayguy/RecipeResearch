@@ -38,14 +38,14 @@ public class ContainerPrototyping extends Container
         {
         	public boolean isItemValid(ItemStack stack)
             {
-                return stack.getItem() == Items.paper;
+                return stack != null && stack.getItem() != null && stack.getItem() == Items.paper;
             }
         });
         this.addSlotToContainer(new Slot(this.protoTile, 2, 144, 56)
         {
         	public boolean isItemValid(ItemStack stack)
             {
-                return stack.getItem() == RecipeResearch.researchPage;
+                return stack != null && stack.getItem() != null && stack.getItem() == RecipeResearch.researchPage;
             }
         });
         int l;
@@ -131,7 +131,7 @@ public class ContainerPrototyping extends Container
                     return null;
                 }
             }
-            else if (!this.mergeItemStack(itemstack1, 0, 3, false))
+            else if (!this.mergeItemStack(itemstack1, 0, 0, false))
             {
                 return null;
             }

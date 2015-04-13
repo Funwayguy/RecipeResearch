@@ -83,7 +83,7 @@ public class TileEntityPrototyping extends TileEntity implements IInventory
     		return;
     	}
     	
-    	if(getStackInSlot(0) != null && (getStackInSlot(1) != null || getStackInSlot(2) != null))
+    	if(getStackInSlot(0) != null && getStackInSlot(0).getItem() != null && (getStackInSlot(1) != null || getStackInSlot(2) != null))
     	{
     		if(progress >= 60)
     		{

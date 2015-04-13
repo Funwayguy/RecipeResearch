@@ -81,7 +81,7 @@ public class EventHandler
 	@SubscribeEvent
 	public void onCrafting(ItemCraftedEvent event) // We could screw with recipe results here but it doesn't work for shift click crafting
 	{
-		if(event.player.worldObj.isRemote)
+		if(event.player.worldObj.isRemote || event.crafting == null || event.crafting.getItem() == null)
 		{
 			return;
 		}

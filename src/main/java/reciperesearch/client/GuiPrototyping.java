@@ -114,7 +114,7 @@ public class GuiPrototyping extends GuiContainer
             	NBTTagCompound inTag = inputs.getCompoundTagAt(i + n);
             	ItemStack inStack = ItemStack.loadItemStackFromNBT(inTag);
             	
-            	if(inStack != null)
+            	if(inStack != null & inStack.getItem() != null)
             	{
             		int research = inTag.getInteger("Research");
             		if(research <= 0 && !(RecipeHelper.StackMatch(inStack, outStack) && inputs.tagCount() == 1))
