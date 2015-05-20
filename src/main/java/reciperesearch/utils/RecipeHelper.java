@@ -3,6 +3,7 @@ package reciperesearch.utils;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryCrafting;
@@ -273,6 +274,43 @@ public class RecipeHelper
             }
 
             return new RecipeInfo(null, null);
+        }
+    }
+    
+    /**
+     * Obtains a random recipe that uses the given item as an ingredient. If given a player, it will exclude recipes already learned<br>
+     * <b>WARNING: Lots of loops in this method, call sparingly
+     */
+    @SuppressWarnings("unchecked")
+	public static RecipeInfo getRecipeFromIngredient(ItemStack stack, Random rand, EntityPlayer player)
+    {
+    	ArrayList<IRecipe> tmpListing = new ArrayList<IRecipe>();
+    	tmpListing.addAll((ArrayList<IRecipe>)CraftingManager.getInstance().getRecipeList());
+    	tmpListing.addAll(allRecipes);
+    	
+    	ArrayList<RecipeInfo> possibleRecipes = new ArrayList<RecipeInfo>();
+    	
+        for (int j = 0; j < tmpListing.size(); ++j) // Note that this now starts at index 1, this is because 0 is reserved for the intercepter
+        {
+            IRecipe irecipe = tmpListing.get(j);
+            
+            if(irecipe == null || irecipe instanceof RecipeInterceptor || irecipe.getRecipeOutput() == null)
+            {
+            	continue;
+            }
+
+            if(ContainsStack(getIngredients(irecipe.getRecipeOutput()), stack, true) && (player == null || ResearchHelper.getItemResearch(player, irecipe.getRecipeOutput()) < 100F))
+            {
+            	possibleRecipes.add(new RecipeInfo(irecipe, irecipe.getRecipeOutput()));
+            }
+        }
+        
+        if(possibleRecipes.size() <= 0)
+        {
+        	return new RecipeInfo(null, null);
+        } else
+        {
+        	return possibleRecipes.get(rand.nextInt(possibleRecipes.size()));
         }
     }
     

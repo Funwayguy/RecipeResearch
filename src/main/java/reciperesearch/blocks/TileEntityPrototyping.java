@@ -8,8 +8,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MathHelper;
+import reciperesearch.core.RR_Settings;
 import reciperesearch.core.RecipeResearch;
 import reciperesearch.utils.RecipeHelper;
+import reciperesearch.utils.RecipeHelper.RecipeInfo;
 import reciperesearch.utils.ResearchHelper;
 
 public class TileEntityPrototyping extends TileEntity implements IInventory
@@ -100,6 +102,20 @@ public class TileEntityPrototyping extends TileEntity implements IInventory
     		
     		if(output == null && paper != null && paper.stackSize >= 1)
     		{
+    			if(!RR_Settings.reverseMode)
+    			{
+    				RecipeInfo recipe = RecipeHelper.getRecipeFromIngredient(input, this.worldObj.rand, null);
+    				if(recipe == null || recipe.stack == null)
+    				{
+    	    			decrStackSize(0, 1);
+    					progress = 0;
+    					return;
+    				} else
+    				{
+    					input = recipe.stack;
+    				}
+    			}
+    			
     			output = new ItemStack(RecipeResearch.researchPage);
     			
     			NBTTagCompound resTags = new NBTTagCompound();

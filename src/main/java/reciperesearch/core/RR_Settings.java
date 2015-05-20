@@ -14,4 +14,5 @@ public class RR_Settings
 	public static boolean hideRecipes = false;
 	public static boolean persistResearch = true;
 	public static boolean claimIncomplete = false;
+	public static boolean reverseMode = false;
 }
