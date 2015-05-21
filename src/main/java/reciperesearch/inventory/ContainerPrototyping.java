@@ -1,6 +1,5 @@
 package reciperesearch.inventory;
 
-import java.util.ArrayList;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
@@ -21,14 +20,10 @@ public class ContainerPrototyping extends Container
     private int posY;
     private int posZ;
     
-	@SuppressWarnings("unchecked")
 	public ContainerPrototyping(EntityPlayer player, TileEntityPrototyping protoTile, int x, int y, int z)
 	{
 		this.protoTile = protoTile;
-		this.protoTile.crafters = this.crafters.size() + 1;
-        ArrayList<EntityPlayer> users = new ArrayList<EntityPlayer>(this.crafters);
-        users.add(player);
-        protoTile.setEfficiency(users);
+		this.protoTile.user = player;
         this.player = player;
         this.posX = x;
         this.posY = y;
@@ -96,14 +91,10 @@ public class ContainerPrototyping extends Container
     /**
      * Called when the container is closed.
      */
-    @SuppressWarnings("unchecked")
 	public void onContainerClosed(EntityPlayer player)
     {
         super.onContainerClosed(player);
-        protoTile.crafters = this.crafters.size() - 1;
-        ArrayList<EntityPlayer> users = new ArrayList<EntityPlayer>(this.crafters);
-        users.remove(player);
-        protoTile.setEfficiency(users);
+        protoTile.user = null;
     }
 
     public boolean canInteractWith(EntityPlayer player)
@@ -131,7 +122,7 @@ public class ContainerPrototyping extends Container
                     return null;
                 }
             }
-            else if (!this.mergeItemStack(itemstack1, 0, 0, false))
+            else if (!this.mergeItemStack(itemstack1, 0, 1, false))
             {
                 return null;
             }

@@ -172,7 +172,7 @@ public class RecipeHelper
 				allRecipes.add(recipe);
 			}
 			
-			CraftingManager.getInstance().getRecipeList().remove(recipe);
+			CraftingManager.getInstance().getRecipeList().remove(i);
 		}
 	}
 	
@@ -200,7 +200,7 @@ public class RecipeHelper
 			{
 				CraftingManager.getInstance().getRecipeList().add(recipe);
 			}
-			allRecipes.remove(recipe);
+			allRecipes.remove(i);
 		}
 	}
 	

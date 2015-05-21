@@ -6,6 +6,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -115,11 +116,11 @@ public class EventHandler
 			return;
 		}
 		
-		if(RecipeResearch.proxy.isClient())
+		if(RecipeResearch.proxy.isClient() && event.itemStack.getItem() != RecipeResearch.failedItem)
 		{
 			boolean flag = false;
 			
-			for(StackTraceElement trace : new Exception().getStackTrace())
+			for(StackTraceElement trace : new Exception().getStackTrace()) // Stops this running on item searches. This is to process intensive for EVERY item
 			{
 				if(trace.getMethodName().equals("drawScreen") || trace.getMethodName().equals("func_73863_a"))
 				{
@@ -130,7 +131,37 @@ public class EventHandler
 			
 			if(flag)
 			{
-				int research = ResearchHelper.getItemResearch(event.entityPlayer, event.itemStack);
+				int research = 0;
+				if(event.itemStack.getItem() == RecipeResearch.researchPage)
+				{
+					if(event.itemStack.getTagCompound() == null)
+					{
+						research = 100;
+					} else
+					{
+						NBTTagList matList = event.itemStack.getTagCompound().getTagList("Materials", 10);
+						
+						if(matList.tagCount() <= 0)
+						{
+							research = 100;
+						} else
+						{
+							float total = matList.tagCount() * 100F;
+							int current = 0;
+							
+							for(int i = 0; i < matList.tagCount(); i++)
+							{
+								NBTTagCompound ingredient = matList.getCompoundTagAt(i);
+								current += ingredient.getInteger("Research");
+							}
+							
+							research = MathHelper.floor_float(current/total*100F);
+						}
+					}
+				} else
+				{
+					research = ResearchHelper.getItemResearch(event.entityPlayer, event.itemStack);
+				}
 				event.toolTip.add(StatCollector.translateToLocalFormatted("reciperesearch.tooltip.research", research + "%"));
 			}
 		}

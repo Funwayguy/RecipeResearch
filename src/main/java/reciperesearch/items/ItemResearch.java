@@ -20,6 +20,7 @@ public class ItemResearch extends Item
 		this.setCreativeTab(CreativeTabs.tabMisc);
 		this.setTextureName("reciperesearch:research_page");
 		this.setUnlocalizedName("reciperesearch.research_page");
+		this.setMaxStackSize(1);
 	}
 
     /**

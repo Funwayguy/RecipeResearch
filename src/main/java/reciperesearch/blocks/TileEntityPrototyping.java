@@ -17,9 +17,8 @@ import reciperesearch.utils.ResearchHelper;
 public class TileEntityPrototyping extends TileEntity implements IInventory
 {
 	public ItemStack[] stackList = new ItemStack[3];
-	public int crafters = 0;
+	public EntityPlayer user;
 	public int progress = 0;
-	public int efficiency = 10;
 	
 	@Override
     public void readFromNBT(NBTTagCompound tags)
@@ -62,25 +61,10 @@ public class TileEntityPrototyping extends TileEntity implements IInventory
         tags.setTag("Items", nbttaglist);
     }
     
-    public void setEfficiency(ArrayList<EntityPlayer> users)
-    {
-    	this.efficiency = 10;
-    	
-    	for(EntityPlayer player : users)
-    	{
-    		int tmpEff = ResearchHelper.getResearchEfficiency(player);
-    		
-    		if(this.efficiency < tmpEff)
-    		{
-    			this.efficiency = tmpEff;
-    		}
-    	}
-    }
-    
     @Override
     public void updateEntity()
     {
-    	if(this.worldObj.isRemote)
+    	if(this.worldObj.isRemote || user == null)
     	{
     		return;
     	}
@@ -92,7 +76,7 @@ public class TileEntityPrototyping extends TileEntity implements IInventory
     			progress = 0;
     		} else
     		{
-    			progress += crafters;
+    			progress += 1;
     			return;
     		}
     		
@@ -104,7 +88,7 @@ public class TileEntityPrototyping extends TileEntity implements IInventory
     		{
     			if(!RR_Settings.reverseMode)
     			{
-    				RecipeInfo recipe = RecipeHelper.getRecipeFromIngredient(input, this.worldObj.rand, null);
+    				RecipeInfo recipe = RecipeHelper.getRecipeFromIngredient(input, this.worldObj.rand, user);
     				if(recipe == null || recipe.stack == null)
     				{
     	    			decrStackSize(0, 1);
@@ -150,7 +134,14 @@ public class TileEntityPrototyping extends TileEntity implements IInventory
 	    			decrStackSize(1, 1);
     			}
     			
-    			decrStackSize(0, 1);
+    			if(RR_Settings.reverseMode)
+    			{
+    				decrStackSize(0, 1);
+    			} else
+    			{
+    				progress = 60;
+    				return;
+    			}
     		} else if(output != null)
     		{
     			NBTTagCompound resTags = output.getTagCompound();
@@ -168,12 +159,12 @@ public class TileEntityPrototyping extends TileEntity implements IInventory
     				
     				if(ingStack != null && (oreDict? RecipeHelper.AllMatch(ingStack, input) : RecipeHelper.StackMatch(ingStack, input)))
     				{
-    					research = MathHelper.clamp_int(research + this.efficiency, 0, 100);
+    					research = MathHelper.clamp_int(research + ResearchHelper.getResearchEfficiency(user), 0, 100);
     					inTags.getCompoundTagAt(i).setInteger("Research", research);
     					//break;
     				} else if(ingStack != null && RecipeHelper.StackMatch(input, outStack))
     				{
-    					research = MathHelper.clamp_int(research + (this.efficiency/2), 0, 100);
+    					research = MathHelper.clamp_int(research + (ResearchHelper.getResearchEfficiency(user)/2), 0, 100);
     					inTags.getCompoundTagAt(i).setInteger("Research", research);
     				}
     			}
@@ -280,7 +271,7 @@ public class TileEntityPrototyping extends TileEntity implements IInventory
 	@Override
 	public boolean isUseableByPlayer(EntityPlayer player)
 	{
-		return true;
+		return user == null || user == player;
 	}
 	
 	@Override
@@ -291,6 +282,7 @@ public class TileEntityPrototyping extends TileEntity implements IInventory
 	@Override
 	public void closeInventory()
 	{
+		user = null;
 	}
 	
 	@Override

@@ -27,7 +27,9 @@ public class ConfigHandler
 				"minecraft:wooden_pickaxe",
 				"minecraft:wooden_shovel",
 				"minecraft:wooden_hoe",
-				"minecraft:wooden_axe"
+				"minecraft:wooden_axe",
+				"minecraft:writable_book",
+				"reciperesearch:prototype_table"
 		};
 		
 		config.load();
