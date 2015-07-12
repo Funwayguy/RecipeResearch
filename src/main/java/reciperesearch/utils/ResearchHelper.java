@@ -63,7 +63,7 @@ public class ResearchHelper
 		
 		for(String listing : RR_Settings.recipeWhitelist)
 		{
-			if(listing.equalsIgnoreCase(researchID) || listing.equalsIgnoreCase(researchWild)) // Direct match
+			if((listing.equalsIgnoreCase(researchID) || listing.equalsIgnoreCase(researchWild)) == !RR_Settings.invertWhitelist) // Direct match
 			{
 				return true;
 			} else if(Arrays.asList(OreDictionary.getOreNames()).contains(listing.replaceFirst("ore:", ""))) // OreDictionary

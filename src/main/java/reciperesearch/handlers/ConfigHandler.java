@@ -44,6 +44,8 @@ public class ConfigHandler
 		RR_Settings.hideUpdates = config.getBoolean("Hide Updates", Configuration.CATEGORY_GENERAL, false, "Hides update notifications");
 		RR_Settings.claimIncomplete = config.getBoolean("Allow Incomplete Research", Configuration.CATEGORY_GENERAL, false, "Allow players to claim incomplete research pages");
 		RR_Settings.reverseMode = config.getBoolean("Reverse Research Mode", Configuration.CATEGORY_GENERAL, false, "Reverse the research system back to 'output > ingredients' mode");
+		RR_Settings.progressive = config.getBoolean("Progressive Research", Configuration.CATEGORY_GENERAL, false, "Players may only reseach recipes when they have completed all ingredient recipes (NORMAL MODE ONLY)");
+		RR_Settings.invertWhitelist = config.getBoolean("Invert Whitelist", Configuration.CATEGORY_GENERAL, false, "Use the recipe whitelist to a blacklist");
 		
 		config.save();
 		

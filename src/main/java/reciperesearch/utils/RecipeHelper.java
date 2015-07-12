@@ -290,16 +290,30 @@ public class RecipeHelper
     	
     	ArrayList<RecipeInfo> possibleRecipes = new ArrayList<RecipeInfo>();
     	
+    	RecipeLoop:
         for (int j = 0; j < tmpListing.size(); ++j) // Note that this now starts at index 1, this is because 0 is reserved for the intercepter
         {
             IRecipe irecipe = tmpListing.get(j);
             
             if(irecipe == null || irecipe instanceof RecipeInterceptor || irecipe.getRecipeOutput() == null)
             {
-            	continue;
+            	continue RecipeLoop;
             }
-
-            if(ContainsStack(getIngredients(irecipe.getRecipeOutput()), stack, true) && (player == null || ResearchHelper.getItemResearch(player, irecipe.getRecipeOutput()) < 100F))
+            
+            ArrayList<ItemStack> ingredients = getIngredients(irecipe.getRecipeOutput());
+            
+            if(player != null && RR_Settings.progressive)
+            {
+	            for(ItemStack ingStack : ingredients)
+	            {
+	            	if(ResearchHelper.getItemResearch(player, ingStack) < 100F)
+	            	{
+	            		continue RecipeLoop;
+	            	}
+	            }
+            }
+            
+            if(ContainsStack(ingredients, stack, true) && (player == null || ResearchHelper.getItemResearch(player, irecipe.getRecipeOutput()) < 100F))
             {
             	possibleRecipes.add(new RecipeInfo(irecipe, irecipe.getRecipeOutput()));
             }
