@@ -63,22 +63,22 @@ public class ResearchHelper
 		
 		for(String listing : RR_Settings.recipeWhitelist)
 		{
-			if((listing.equalsIgnoreCase(researchID) || listing.equalsIgnoreCase(researchWild)) == !RR_Settings.invertWhitelist) // Direct match
+			if(listing.equalsIgnoreCase(researchID) || listing.equalsIgnoreCase(researchWild)) // Direct match
 			{
-				return true;
+				return !RR_Settings.invertWhitelist;
 			} else if(Arrays.asList(OreDictionary.getOreNames()).contains(listing.replaceFirst("ore:", ""))) // OreDictionary
 			{
 				for(ItemStack oreStack : OreDictionary.getOres(listing.replaceFirst("ore:", "")))
 				{
 					if(RecipeHelper.StackMatch(stack, oreStack))
 					{
-						return true;
+						return !RR_Settings.invertWhitelist;
 					}
 				}
 			}
 		}
 		
-		return false;
+		return RR_Settings.invertWhitelist;
 	}
 	
 	/**
